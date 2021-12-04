@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-php-deployment
+  name: nginx-php-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-php-deployment
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx-php-deployment
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+        volumeMounts:
+        - mountPath: "/var/www/html"
+          name: data-store-pv
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+  
+      - image: bigphp
+        name: phpapp
+        imagePullPolicy: IfNotPresent
+        resources: {}
+        volumeMounts:
+        - mountPath: "/var/www/html"
+          name: data-store-pv
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: php-secret
+              key: mysql_root_password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: php-config
+              key: mysql_database
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: php-config
+              key: mysql_host
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              name: php-config
+              key: mysql_user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: php-secret
+              key: mysql_password
+      volumes:
+      - name: data-store-pv
+        persistentVolumeClaim:
+          claimName: data-store-pv-claim
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+status: {}
