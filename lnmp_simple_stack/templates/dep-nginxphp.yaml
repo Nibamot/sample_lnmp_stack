@@ -5,7 +5,7 @@ metadata:
     app: nginx-php-deployment
   name: nginx-php-deployment
 spec:
-  replicas: 1
+  replicas: {{.Values.replicaCount}}
   selector:
     matchLabels:
       app: nginx-php-deployment
@@ -16,7 +16,7 @@ spec:
         app: nginx-php-deployment
     spec:
       containers:
-      - image: nginx
+      - image: {{.Values.image.repositoryone}}
         name: nginx
         resources: {}
         volumeMounts:
@@ -26,7 +26,7 @@ spec:
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
   
-      - image: bigphp
+      - image: {{.Values.image.repositorytwo}}
         name: phpapp
         imagePullPolicy: IfNotPresent
         resources: {}
@@ -67,3 +67,23 @@ spec:
         configMap:
           name: nginx-config
 status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-php-deployment
+  name: nginx-php-svc
+  namespace: default
+spec:
+  ports:
+  - nodePort: {{.Values.service.nodePort}}
+    port: {{.Values.service.port}}
+    protocol: TCP
+    targetPort: {{.Values.service.port}}
+  selector:
+    app: nginx-php-deployment
+  sessionAffinity: None
+  type: {{.Values.service.type}}
+status:
+  loadBalancer: {}
