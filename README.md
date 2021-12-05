@@ -50,5 +50,11 @@ We will go though the components that need to be used in our K8s deployment.
 A deployment (`nginx-php-deployment`) in which each pod contains one `nginx` container and a Custom `phpapp` container is setup. The Php image is custom in order to allow the container to access and retrieve data from the Mysql DB. An appropriate NodePort based service (nginx-php-svc) on port 30600 from default port 80 is setup for this deployment such that it can accessed. We have setup the `nginx.conf` file  using a config map named `nginx-config-volume`.  Also, the phpapp has been configured to receive the MySQL access credentials though secrets and config-maps. The nginx-php-deployment is also served by a Persistent Volume named `data-store-pv` that shares the index.php and testdb.py on the hostpath `data_scripts`. I have also setup a Horizontal Pod Autoscaler for this deployment with the autoscaler triggered if the cpu utilization goes beyond 90% (just an example) .
 
 2. **MySQL**
-A deployment named `mysql-deployment` is in place to serve as the DB. The deployment has been exposed as a ClusterIP (mysql-svc) on the default port 3306. 
-The MySQL deployment also has a Persistent Volume to keep it's data stateful. 
+A deployment named `mysql-deployment` is in place to serve as the DB. The deployment has been exposed as a ClusterIP (mysql-svc) on the default port 3306. The MySQL deployment also has a Persistent Volume to keep it's data stateful and if one pod goes down another one will come up and be able to access the previous state. Horizontal Pod Autoscaler has been applied to this one as well
+
+Within the helm charts I have also included a simple test-case to test the functioning of the endpoint.
+
+We can run this chart by adding the helm repo:
+1. `helm repo add <repo-name> https://raw.githubusercontent.com/Nibamot/sample_lnmp_stack/master`
+2. `helm install <custom-chart-name> <repo/chart-name>` to install the helm chart.
+3. This chart can be removed simply by doing a `helm uninstall <custom-chart-name>`
