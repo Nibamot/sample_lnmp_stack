@@ -29,7 +29,7 @@ To test the working of this simple LNMP setup I wrote a docker-compose. The dock
 1.  `Docker` and `docker-compose` needs to be installed  (https://docs.docker.com/compose/install/)
 
 ## Getting started
-1. Clone this repository
+1. Clone this repository[https://github.com/Nibamot/sample_lnmp_stack]
 2. Configure `Docker` to use the `Docker daemon` in your kubernetes cluster via your terminal: `eval $(minikube docker-env)`
 3. Pull the latest mysql image from `Dockerhub`: `Docker pull mysql`
 4. Build a kubernetes-api image with the Dockerfile in this repo: `Docker build . -t flask-api`
