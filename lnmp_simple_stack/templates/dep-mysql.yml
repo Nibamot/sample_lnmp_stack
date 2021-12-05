@@ -39,11 +39,19 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: mysql_password
-        resources: {} 
-          #limits:
-          #  cpu: {{.Values.resources.limits.cpu}}
-          #requests:
-          #  cpu: {{.Values.resources.requests.cpu}}
+        resources: 
+          limits:
+            cpu: {{.Values.resources.limits.cpu}}
+          requests:
+            cpu: {{.Values.resources.requests.cpu}}
+        volumeMounts:
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+          
         
 status: {}
 

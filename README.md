@@ -14,7 +14,7 @@ Before we dig into the specifics of each process , there are a few components th
 NGINX along wih Apache is one of the most widely used web-servers. to act as a reverse proxy. By default it serves on port 80.
 
 2. **PHP-FPM**
-PHP_FPM stands for PHP-FastCGI Process Manager. This is primarily used for interfacing interactive programs with the web-server(Not just plain HTML) Simply put, the the PHP-FPM is reponsible in this scenario for loading the data. By default it works on the port 9000. The PHP output is then served through nginx. 
+PHP-FPM stands for PHP-FastCGI Process Manager. This is primarily used for interfacing interactive programs with the web-server(Not just plain HTML) Simply put, the the PHP-FPM is reponsible in this scenario for loading the data. By default it works on the port 9000. The PHP output is then served through nginx. 
 
 3. **MySQL**
 MySQl is an example of a well-used database among monolithic and microservices architecture. It serves on port 3306 by default.
@@ -41,8 +41,8 @@ With the `docker-demo` folder in place, one has to simply run the `docker-compos
 
 
 ## Part two: Kubernetes deployment
-
-I have used packaged this application into a helmchart for sake of automation in deployment. Helming also makes our job easier to upgrade and track applications. 
+I have used minikube as an example of a cloud-premise. 
+This application has been packaged into a helmchart for sake of automation in deployment. Helming also makes our job easier to upgrade and track applications. 
 
 We will go though the components that need to be used in our K8s deployment.
 
@@ -51,3 +51,4 @@ A deployment (`nginx-php-deployment`) in which each pod contains one `nginx` con
 
 2. **MySQL**
 A deployment named `mysql-deployment` is in place to serve as the DB. The deployment has been exposed as a ClusterIP (mysql-svc) on the default port 3306. 
+The MySQL deployment also has a Persistent Volume to keep it's data stateful. 
