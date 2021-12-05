@@ -4,9 +4,12 @@
 
 replicaCount: 1
 
+
+
 image:
   repositoryone: nginx
-  repositorytwo: bigphp
+  repositorytwo: customphp
+  repositorythree: mysql
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
  
@@ -15,6 +18,11 @@ service:
   type: NodePort
   port: 80
   nodePort: 30600
+
+service2:
+   type: ClusterIP
+   port: 3306
+   
 
 ingress:
   enabled: false
@@ -32,23 +40,23 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources: 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
+   limits:
+     cpu: 200m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
+   requests:
+     cpu: 100m
   #   memory: 128Mi
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 90
   # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
@@ -56,3 +64,4 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+hostip: 192.168.49.2

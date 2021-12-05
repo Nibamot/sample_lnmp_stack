@@ -18,7 +18,11 @@ spec:
       containers:
       - image: {{.Values.image.repositoryone}}
         name: nginx
-        resources: {}
+        resources: 
+          limits:
+            cpu: {{.Values.resources.limits.cpu}}
+          requests:
+            cpu: {{.Values.resources.requests.cpu}}
         volumeMounts:
         - mountPath: "/var/www/html"
           name: data-store-pv
@@ -28,8 +32,12 @@ spec:
   
       - image: {{.Values.image.repositorytwo}}
         name: phpapp
-        imagePullPolicy: IfNotPresent
-        resources: {}
+        imagePullPolicy: Never
+        resources: 
+          limits:
+            cpu: {{.Values.resources.limits.cpu}}
+          requests:
+            cpu: {{.Values.resources.requests.cpu}}
         volumeMounts:
         - mountPath: "/var/www/html"
           name: data-store-pv

@@ -5,7 +5,7 @@ metadata:
     app: mysql-deployment
   name: mysql-deployment
 spec:
-  replicas: 1
+  replicas: {{.Values.replicaCount}}
   selector:
     matchLabels:
       app: mysql-deployment
@@ -16,7 +16,7 @@ spec:
         app: mysql-deployment
     spec:
       containers:
-      - image: mysql
+      - image: {{.Values.image.repositorythree}}
         name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -39,5 +39,31 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: mysql_password
-        resources: {}
+        resources: {} 
+          #limits:
+          #  cpu: {{.Values.resources.limits.cpu}}
+          #requests:
+          #  cpu: {{.Values.resources.requests.cpu}}
+        
 status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysql-deployment
+  name: mysql-svc
+  namespace: default
+spec:
+  ports:
+  - port: {{.Values.service2.port}}
+    protocol: TCP
+    targetPort: {{.Values.service2.port}}
+  selector:
+    app: mysql-deployment
+  sessionAffinity: None
+  type: {{.Values.service2.type}}
+status:
+  loadBalancer: {}
