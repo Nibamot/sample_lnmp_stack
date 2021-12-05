@@ -1,10 +1,10 @@
 # Sample LNMP stack
  Linux, Nginx, MySQL and PHP in this case
 
-# GOAL
+## Goal
 To setup a simple nginx and mysql application and display data fom mysql using nginx while exposing nginx and keeping mysql under wraps. 
 
-# PLAN
+## Plan
 We can divide the documentation below into 2 parts.
 The first part being the testing of these components in the local docker setup. The second part describes the process of securely deploying the solution on the cloud-premises.  
 
@@ -25,6 +25,31 @@ MySQl is an example of a well-used database among monolithic and microservices a
 ## Part one: Docker-Compose
 To test the working of this simple LNMP setup I wrote a docker-compose. The docker-compose has the following components. The docker-compose is a simple single line command to be run provided docker is installed. This makes testing way easier to configure, test and troubleshoot.
 
+## Prerequisites
+1.  `Docker` and `docker-compose` needs to be installed  (https://docs.docker.com/compose/install/)
+
+## Getting started
+1. Clone this repository
+2. Configure `Docker` to use the `Docker daemon` in your kubernetes cluster via your terminal: `eval $(minikube docker-env)`
+3. Pull the latest mysql image from `Dockerhub`: `Docker pull mysql`
+4. Build a kubernetes-api image with the Dockerfile in this repo: `Docker build . -t flask-api`
+
+## Secrets
+`Kubernetes Secrets` can store and manage sensitive information. For this example we will define a password for the
+`root` user of the `MySQL` server using the `Opaque` secret type. For more info: https://kubernetes.io/docs/concepts/configuration/secret/
+
+1. Encode your password in your terminal: `echo -n super-secret-passwod | base64`
+2. Add the output to the `flakapi-secrets.yml` file at the `db_root_password` field
+
+## Deployments
+Get the secrets, persistent volume in place and apply the deployments for the `MySQL` database and `Flask API`
+
+1. Add the secrets to your `kubernetes cluster`: `kubectl apply -f flaskapi-secrets.yml`
+2. Create the `persistent volume` and `persistent volume claim` for the database: `kubectl apply -f mysql-pv.yml`
+3. Create the `MySQL` deployment: `kubectl apply -f mysql-deployment.yml`
+4. Create the `Flask API` deployment: `kubectl apply -f flaskapp-deployment.yml`
+
+You can check the status of the pods, services and deployments.
 
 
 1. **NGINX**
@@ -37,6 +62,8 @@ Another custom image of php-fpm was was built. The PHP output is then served thr
 MySQl acts as the database from which nginx-php duo retrieve data. The `testdb.py` script simply creates a table and keeps adding and entry to the table in the database every time the script is run. 
 
 
+
+### How to run
 With the `docker-demo` folder in place, one has to simply run the `docker-compose up -d` command. Then application springs up and you can check http://localhost:8085 shows a sample output from the database. It can be torn down as easily as it was brought up with the command `docker-compose down`.
 
 
@@ -47,13 +74,15 @@ This application has been packaged into a helmchart for sake of automation in de
 We will go though the components that need to be used in our K8s deployment.
 
 1. **Nginx and PHP**
-A deployment (`nginx-php-deployment`) in which each pod contains one `nginx` container and a Custom `phpapp` container is setup. The Php image is custom in order to allow the container to access and retrieve data from the Mysql DB. An appropriate NodePort based service (nginx-php-svc) on port 30600 from default port 80 is setup for this deployment such that it can accessed. We have setup the `nginx.conf` file  using a config map named `nginx-config-volume`.  Also, the phpapp has been configured to receive the MySQL access credentials though secrets and config-maps. The nginx-php-deployment is also served by a Persistent Volume named `data-store-pv` that shares the index.php and testdb.py on the hostpath `data_scripts`. I have also setup a Horizontal Pod Autoscaler for this deployment with the autoscaler triggered if the cpu utilization goes beyond 90% (just an example) .
+A deployment (`nginx-php-deployment`) in which each pod contains one `nginx` container and a Custom `phpapp` container is setup. The Php image is custom in order to allow the container to access and retrieve data from the Mysql DB. An appropriate NodePort based service (nginx-php-svc) on port 30600 from default port 80 is setup for this deployment such that it can accessed. We have setup the `nginx.conf` file  using a config map named `nginx-config-volume`.  Also, the phpapp has been configured to receive the MySQL access credentials though secrets and config-maps.
+The passwords have been base64 encoded.The nginx-php-deployment is also served by a Persistent Volume named `data-store-pv` that shares the index.php and testdb.py on the hostpath `data_scripts`. I have also setup a Horizontal Pod Autoscaler for this deployment with the autoscaler triggered if the cpu utilization goes beyond 90% (just an example) .
 
 2. **MySQL**
 A deployment named `mysql-deployment` is in place to serve as the DB. The deployment has been exposed as a ClusterIP (mysql-svc) on the default port 3306. The MySQL deployment also has a Persistent Volume to keep it's data stateful and if one pod goes down another one will come up and be able to access the previous state. Horizontal Pod Autoscaler has been applied to this one as well
 
 Within the helm charts I have also included a simple test-case to test the functioning of the endpoint.
 
+### How to run
 We can run this chart by adding the helm repo:
 1. `helm repo add <repo-name> https://raw.githubusercontent.com/Nibamot/sample_lnmp_stack/master`
 2. `helm install <custom-chart-name> <repo/chart-name>` to install the helm chart.
